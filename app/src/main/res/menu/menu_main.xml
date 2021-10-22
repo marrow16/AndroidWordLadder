@@ -1,0 +1,21 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.example.wordladder.MainActivity">
+    <item
+        android:id="@+id/action_new_puzzle"
+        android:orderInCategory="100"
+        android:title="@string/new_puzzle"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/hints_switch"
+        android:orderInCategory="101"
+        android:title="@string/hints"
+        android:checked="true"
+        android:checkable="true" />
+    <item
+        android:id="@+id/help_item"
+        android:orderInCategory="101"
+        android:title="@string/help"
+        app:showAsAction="never" />
+</menu>

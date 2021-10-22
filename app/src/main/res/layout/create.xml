@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/text_word_length"
+                android:textSize="24sp" />
+
+            <Spinner
+                android:id="@+id/spinner_word_length"
+                android:layout_width="200sp"
+                android:layout_height="wrap_content"
+                android:background="@android:drawable/btn_dropdown"
+                android:contentDescription="@string/hint_word_length"
+                android:focusable="auto"
+                android:spinnerMode="dropdown" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="16sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/text_ladder_length"
+                android:textSize="24sp" />
+
+            <Spinner
+                android:id="@+id/spinner_ladder_length"
+                android:layout_width="200sp"
+                android:layout_height="wrap_content"
+                android:background="@android:drawable/btn_dropdown"
+                android:contentDescription="@string/hint_ladder_length"
+                android:focusable="auto"
+                android:spinnerMode="dropdown" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="16sp" />
+
+            <TableLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:shrinkColumns="1"
+                android:stretchColumns="1">
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="bottom"
+                        android:text="@string/text_start_word"
+                        android:textSize="24sp" />
+
+                    <Button
+                        android:id="@+id/button_random_start_word"
+                        style="?android:attr/buttonBarButtonStyle"
+                        android:layout_width="32sp"
+                        android:layout_height="32sp"
+                        android:layout_gravity="bottom"
+                        app:icon="@drawable/random32" />
+
+                </TableRow>
+            </TableLayout>
+
+            <EditText
+                android:id="@+id/edit_start_word"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/word_back"
+                android:ems="15"
+                android:fontFamily="monospace"
+                android:importantForAutofill="no"
+                android:inputType="textNoSuggestions|text"
+                android:padding="4dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:singleLine="true"
+                android:textAllCaps="true"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:typeface="monospace" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="16sp" />
+
+            <TableLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:shrinkColumns="1"
+                android:stretchColumns="1">
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="bottom"
+                        android:text="@string/text_end_word"
+                        android:textSize="24sp" />
+
+                    <Button
+                        android:id="@+id/button_random_end_word"
+                        style="?android:attr/buttonBarButtonStyle"
+                        android:layout_width="32sp"
+                        android:layout_height="32sp"
+                        android:layout_gravity="bottom"
+                        app:icon="@drawable/random32" />
+
+                </TableRow>
+            </TableLayout>
+
+            <EditText
+                android:id="@+id/edit_end_word"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/word_back"
+                android:ems="15"
+                android:fontFamily="monospace"
+                android:importantForAutofill="no"
+                android:inputType="textNoSuggestions|text"
+                android:padding="4dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:singleLine="true"
+                android:textAllCaps="true"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:typeface="monospace" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="32sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="64sp"
+                android:orientation="horizontal">
+
+                <TableRow
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent">
+
+                    <Button
+                        android:id="@+id/button_cancel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/text_cancel"
+                        android:textSize="24sp" />
+
+                </TableRow>
+
+                <Space
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+
+                <TableRow
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="end">
+
+                    <Button
+                        android:id="@+id/button_create"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:text="@string/text_create"
+                        android:textSize="24sp" />
+                </TableRow>
+            </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

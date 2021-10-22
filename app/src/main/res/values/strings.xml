@@ -1,0 +1,30 @@
+<resources>
+    <string name="app_name">Word Ladder</string>
+    <string name="new_puzzle">New puzzle…</string>
+    <string name="hints">Hints\'n\'Tips</string>
+    <string name="text_word_length">Word length</string>
+    <string name="text_ladder_length">Ladder steps</string>
+    <string name="text_start_word">Start word (optional)</string>
+    <string name="text_end_word">End word (optional)</string>
+    <string name="text_cancel">Cancel</string>
+    <string name="text_create">Create</string>
+    <string name="hint_word_length">Select word length</string>
+    <string name="hint_ladder_length">Select ladder length</string>
+    <string name="empty_text_solutions">(number of solutions)</string>
+    <string name="actionbar_title_create">Word Ladder - New Puzzle</string>
+    <string name="actionbar_title_help">Word Ladder - Help</string>
+    <string name="help_1">Word Ladder Help</string>
+    <string name="help_wkipedia_link">https://en.wikipedia.org/wiki/Word_ladder</string>
+    <string name="help_2">The objective of the puzzle is to convert one word to another - at each step you can change only one letter and each word must be a valid word</string>
+    <string name="help_3">Dictionary</string>
+    <string name="help_4">The dictionary is based on the Official Collins Scrabble Words (2019)</string>
+    <string name="help_5">With Hints\'n\'Tips turned on (see menu) the app will give you some help in finding the word for each step.</string>
+    <string name="help_6">Enter <b><i>?</i></b> <i>(question mark)</i> as entire entry - to suggest a word that could fit at the step</string>
+    <string name="help_6a">Enter <b><i>-</i></b> <i>(hyphen)</i> as a character in entry - tips will appear to suggest what letter(s) can be at that position in the word</string>
+    <string name="help_7">Enter <b><i>.</i></b> <i>(full stop)</i> - to suggest the letters that need to be changed</string>
+    <string name="help_8">Entering words</string>
+    <string name="help_9">Use the keyboard to enter a word at each step.  Tap to the left or right of each step edit to nudge the selected character</string>
+    <string name="help">Help...</string>
+    <string name="help_5a">With Hints\'n\'Tips turned on you will also be able to see all of the possible solutions found.  Double-tap on words in the solutions to show the meaning of the word.</string>
+
+</resources>
