@@ -14,8 +14,13 @@
         android:checked="true"
         android:checkable="true" />
     <item
+        android:id="@+id/word_lookup_item"
+        android:orderInCategory="102"
+        android:title="@string/word_lookup"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/help_item"
-        android:orderInCategory="101"
+        android:orderInCategory="103"
         android:title="@string/help"
         app:showAsAction="never" />
 </menu>

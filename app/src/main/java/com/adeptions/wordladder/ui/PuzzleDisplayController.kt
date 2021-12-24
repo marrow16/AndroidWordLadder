@@ -45,22 +45,20 @@ class PuzzleDisplayController(val main: MainActivity) {
             val edit = controls.puzzleEdits[i]
             edit.addTextChangedListener(afterTextChanged = { s: Editable? ->
                 if (!internalUpdate) {
-                    onLadderWordChanged(i + 1, edit, s)
+                    onAfterLadderWordChanged(i + 1, edit, s)
                 }
+            })
+            edit.addTextChangedListener(beforeTextChanged = { text: CharSequence?, start: Int, count: Int, after: Int ->
+                onBeforeLadderWordChanged(edit, text, start, count, after)
             })
             edit.setOnFocusChangeListener { v, hasFocus ->
                 if (!internalUpdate) {
                     onLadderWordFocusChanged(i + 1, edit, hasFocus)
                 }
             }
-            val doubleTapDetector = GestureDetector(main, object : GestureDetector.SimpleOnGestureListener() {
-                override fun onDoubleTap(e: MotionEvent): Boolean {
-                    suggestWord(i + 1, edit, false)
-                    return true
-                }
-            })
-            edit.setOnTouchListener { v, event -> doubleTapDetector.onTouchEvent(event) }
-
+            edit.setOnLongClickListener(View.OnLongClickListener { v: View? ->
+                lookupEditWord(edit)
+                true})
             val row = controls.puzzleRows[i]
             val rowTapDetector = GestureDetector(main, object : GestureDetector.SimpleOnGestureListener() {
                 override fun onShowPress(e: MotionEvent) {
@@ -71,15 +69,16 @@ class PuzzleDisplayController(val main: MainActivity) {
         }
         for (s in controls.solutionWords.indices) {
             val wordView = controls.solutionWords[s]
-            wordView.isClickable = true
-            val doubleTapDetector = GestureDetector(main, object : GestureDetector.SimpleOnGestureListener() {
-                override fun onDoubleTap(e: MotionEvent): Boolean {
-                    showWordMeaningHint(s, wordView)
-                    return true
-                }
-            })
-            wordView.setOnTouchListener { v, event -> doubleTapDetector.onTouchEvent(event) }
+            wordView.setOnLongClickListener(View.OnLongClickListener { v: View? ->
+                    showSolutionWordMeaning(s, wordView)
+                    true})
         }
+        controls.firstWordTextView.setOnLongClickListener(View.OnLongClickListener { v: View? ->
+            main.lookupWord(puzzle.startWord, null)
+            true})
+        controls.endWordTextView.setOnLongClickListener(View.OnLongClickListener { v: View? ->
+            main.lookupWord(puzzle.endWord, null)
+            true})
         internalUpdate = false
         SwipeDetector(controls.solutionsHeader) { _, swipeType -> onHeaderSwipe(swipeType) }
     }
@@ -88,6 +87,7 @@ class PuzzleDisplayController(val main: MainActivity) {
         this.puzzle = puzzle
         showingSolution = -1
         resetViews()
+        controls.pointsTotal.setText("" + puzzle.points)
         showSolutions(false)
         controls.show(DisplayView.PUZZLE)
         controls.solutionWords[0].requestFocus()
@@ -95,25 +95,26 @@ class PuzzleDisplayController(val main: MainActivity) {
 
     private fun resetViews() {
         internalUpdate = true
-        controls.firstWordTextView.setEms(puzzle.wordLength)
+        val emsLength = puzzle.wordLength
+        controls.firstWordTextView.setEms(emsLength)
         controls.firstWordTextView.setBackgroundResource(controls.backgroundNormal)
         controls.firstWordTextView.text = puzzle.startWord.toString()
-        controls.endWordTextView.setEms(puzzle.wordLength)
+        controls.endWordTextView.setEms(emsLength)
         controls.endWordTextView.setBackgroundResource(controls.backgroundNormal)
         controls.endWordTextView.text = puzzle.endWord.toString()
         val maxEditRow = puzzle.ladderLength - 1
-        for (row in 0 until 50) {
+        for (row in 0 until controls.solutionRows.size) {
             controls.solutionRows[row].visibility = if (row < puzzle.ladderLength) {
                 View.VISIBLE
             } else {
                 View.GONE
             }
-            controls.solutionWords[row].setEms(puzzle.wordLength)
-            if (row in 1..48) {
+            controls.solutionWords[row].setEms(emsLength)
+            if (row in 1..78) {
                 val edit = controls.puzzleEdits[row - 1]
                 edit.setBackgroundResource(controls.backgroundNormal)
                 edit.filters = arrayOf(InputFilter.LengthFilter(puzzle.wordLength), InputFilter.AllCaps())
-                edit.setEms(puzzle.wordLength)
+                edit.setEms(emsLength)
                 edit.setText("")
                 controls.puzzleRows[row - 1].visibility = if (row < maxEditRow) {
                     View.VISIBLE
@@ -125,15 +126,37 @@ class PuzzleDisplayController(val main: MainActivity) {
         internalUpdate = false
     }
 
-    internal fun onLadderWordChanged(position: Int, edit: EditText, s: Editable?) {
-        if (s != null) {
-            controls.cancelWordHintToaster()
+    private fun onBeforeLadderWordChanged(edit: EditText, text: CharSequence?, start: Int, count: Int, after: Int) {
+        val len = (text?:"").length
+        if (count == 1 && after == 1 && len == puzzle.wordLength) {
+            val next = Math.min(len - 1, start + 1)
+            edit.post { selectNextCharacter(edit, next) }
+        } else if (count == 0 && after == 1 && (len + 1) == puzzle.wordLength) {
+            // last letter being added
+            edit.post { edit.setSelection(len, len + 1) }
+        }
+    }
+
+    private fun selectNextCharacter(edit: EditText, next: Int) {
+        if (hintsOn) {
+            val text = edit.text.toString()
+            if (text.substring(next - 1, next) != ".") {
+                edit.setSelection(next, next + 1)
+            }
+        } else {
+            edit.setSelection(next, next + 1)
+        }
+    }
+
+    private fun onAfterLadderWordChanged(position: Int, edit: EditText, s: Editable?) {
+        if (s != null && this::puzzle.isInitialized) {
+            controls.cancelToaster()
             val current = s.toString()
             if (hintsOn && (current == "?" || current == ",")) {
                 suggestWord(position, edit, true)
             } else if (hintsOn && current == ".") {
                 suggestLetterChanges(position, edit)
-            } else if (hintsOn && current.length == puzzle.wordLength && hasJustOneHyphen(current)) {
+            } else if (hintsOn && current.length == puzzle.wordLength && hasJustOneFullstop(current)) {
                 suggestLetters(position, edit, current)
             } else {
                 updateHints(position, edit, current)
@@ -206,14 +229,14 @@ class PuzzleDisplayController(val main: MainActivity) {
 
     private fun suggestLetters(position: Int, edit: EditText, current: String) {
         if (hintsOn) {
-            val hyphenAt: Int = current.indexOf('-')
-            if (hyphenAt != -1) {
+            val fullStopAt: Int = current.indexOf('.')
+            if (fullStopAt != -1) {
                 val previousWord = getPreviousWord(position, true)
                 val nextWord = getNextWord(position, true)
                 val letters: List<Char> = puzzle.solutions.stream()
                     .filter { solution -> previousWord == null || solution[position - 1] == previousWord }
                     .filter { solution -> nextWord == null || solution[position + 1] == nextWord}
-                    .map { solution -> solution[position][hyphenAt] }
+                    .map { solution -> solution[position][fullStopAt] }
                     .distinct()
                     .toList()
                     .sorted()
@@ -232,7 +255,7 @@ class PuzzleDisplayController(val main: MainActivity) {
                         }
                     }
                     showHintForLadderWord(position, edit, tryText)
-                    edit.setSelection(hyphenAt, hyphenAt + 1)
+                    edit.setSelection(fullStopAt, fullStopAt + 1)
                 } else {
                     showHintForLadderWord(position, edit, "Sorry, no suggested letters")
                 }
@@ -288,8 +311,8 @@ class PuzzleDisplayController(val main: MainActivity) {
         }
     }
 
-    private fun hasJustOneHyphen(s: String): Boolean {
-        return s.chars().filter { ch -> ch == '-'.code }.count() == 1L
+    private fun hasJustOneFullstop(s: String): Boolean {
+        return s.chars().filter { ch -> ch == '.'.code }.count() == 1L
     }
 
     fun nightModeChanged() {
@@ -399,7 +422,8 @@ class PuzzleDisplayController(val main: MainActivity) {
             for (i in 0 until puzzle.ladderLength - 2) {
                 controls.puzzleEdits[i].setBackgroundResource(controls.backgroundGood)
             }
-            Toast.makeText(main, "You solved it!", Toast.LENGTH_SHORT).show()
+            //Toast.makeText(main, "You solved it!", Toast.LENGTH_SHORT).show()
+            controls.createToaster("You solved it!").show()
         }
     }
 
@@ -407,20 +431,14 @@ class PuzzleDisplayController(val main: MainActivity) {
         return s.chars().anyMatch { ch -> ch < 'A'.code || ch > 'Z'.code }
     }
 
-    private fun showWordMeaningHint(position: Int, wordView: TextView) {
-        val itemHeight = controls.firstWordTextView.height
-        val yPosition = (16 + controls.solutionsHeaderArea.height + (position * itemHeight)) - controls.solutionLadderScroller.scrollY
-        val word = puzzle.solutions[showingSolution][position]
-        val toaster = controls.createWordHintToaster()
-        toaster.setText(word.toString() + ": " + word.meaning)
-        toaster.setGravity(Gravity.TOP + Gravity.CENTER_HORIZONTAL, 0, yPosition)
-        toaster.show()
+    private fun showSolutionWordMeaning(position: Int, wordView: TextView) {
+        main.lookupWord(puzzle.solutions[showingSolution][position], null)
     }
 
     private fun showHintForLadderWord(position: Int, edit: EditText, message: String) {
         val itemHeight = controls.firstWordTextView.height
-        val yPosition = (16 + controls.solutionsHeaderArea.height + (position * itemHeight)) - controls.puzzleLadderScroller.scrollY
-        val toaster = controls.createWordHintToaster()
+        val yPosition = (16 + controls.solutionsHeaderArea.height + (position * itemHeight)) - controls.puzzleScroller.scrollY
+        val toaster = controls.createToaster()
         toaster.setText(message)
         toaster.setGravity(Gravity.TOP + Gravity.CENTER_HORIZONTAL, 0, yPosition)
         toaster.show()
@@ -430,15 +448,17 @@ class PuzzleDisplayController(val main: MainActivity) {
         solutionsShowing = show
         if (!solutionsShowing) {
             controls.viewSwitching = true
+            val sy = controls.puzzleScroller.scrollY
             controls.solutionLadderView.visibility = View.GONE
             controls.puzzleLadderView.visibility = View.VISIBLE
             updateSolutionsHeader()
+            controls.puzzleScroller.scrollY = sy
         } else {
-            val sy = controls.puzzleLadderScroller.scrollY
+            val sy = controls.puzzleScroller.scrollY
             controls.puzzleLadderView.visibility = View.GONE
             controls.solutionLadderView.visibility = View.VISIBLE
-            controls.solutionLadderScroller.scrollY = sy
             showSolution()
+            controls.puzzleScroller.scrollY = sy
         }
     }
 
@@ -566,6 +586,10 @@ class PuzzleDisplayController(val main: MainActivity) {
         } else if (hasFocus) {
             controls.lastFocused = edit
         }
+    }
+
+    private fun lookupEditWord(edit: EditText) {
+        main.lookupWord(puzzle.dictionary[edit.text.toString()], edit.text.toString())
     }
 
     private fun onHeaderSwipe(type: SwipeType) {
