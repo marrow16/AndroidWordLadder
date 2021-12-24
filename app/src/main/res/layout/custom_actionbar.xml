@@ -10,10 +10,10 @@
     android:titleTextColor="@color/white"
     myapp:popupTheme="@style/Widget.MaterialComponents.ActionBar.PrimarySurface"
     myapp:theme="@style/Widget.AppCompat.ActionBar"
-    myapp:titleTextAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Title" />
+    />
 <!--
     android:background="@null"
     myapp:popupTheme="@style/ActionBarPopupThemeOverlay"
     myapp:titleTextAppearance="@style/ActionBar.TitleText"
-
+myapp:titleTextAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
 -->

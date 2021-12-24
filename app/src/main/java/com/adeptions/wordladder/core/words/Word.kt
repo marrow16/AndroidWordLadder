@@ -4,7 +4,7 @@ import kotlin.streams.toList
 
 private const val VARIATION_CHAR = '_'
 
-class Word(actualWord: String, private val means: String) {
+class Word(actualWord: String, private val maxSteps: Int) {
     private val actualWord = actualWord.uppercase()
     private val wordChars = this.actualWord.toCharArray()
     private val hash = this.actualWord.hashCode()
@@ -28,11 +28,11 @@ class Word(actualWord: String, private val means: String) {
     val length: Int
         get() = actualWord.length
 
-    val meaning: String
-        get() = means
-
     val isIslandWord: Boolean
         get() = links.isEmpty()
+
+    val maximumSteps: Int
+        get() = maxSteps
 
     val linkedWords: List<Word>
         get() = this.links

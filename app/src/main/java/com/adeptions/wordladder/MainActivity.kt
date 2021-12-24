@@ -9,7 +9,10 @@ import com.adeptions.wordladder.core.words.Word
 
 import com.adeptions.wordladder.core.solving.*
 import com.adeptions.wordladder.ui.*
+import com.android.volley.RequestQueue
+import com.android.volley.toolbox.Volley
 import kotlin.Exception
+
 
 class MainActivity : AppCompatActivity() {
     var wordLength: Int = 3
@@ -17,12 +20,20 @@ class MainActivity : AppCompatActivity() {
     lateinit var dictionary: Dictionary
 
     lateinit var controls: MainActivityControls
-    private lateinit var createPuzzleController: CreatePuzzleController
-    private lateinit var puzzleDisplayController: PuzzleDisplayController
+    lateinit var createPuzzleController: CreatePuzzleController
+    lateinit var puzzleDisplayController: PuzzleDisplayController
+    lateinit var wordLookupController: WordLookupController
+    lateinit var customKeyboardController: CustomKeyboardController
+
+    lateinit var requestQueue: RequestQueue
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        requestQueue = Volley.newRequestQueue(this)
+
+        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
         controls = MainActivityControls(this)
 
@@ -30,6 +41,8 @@ class MainActivity : AppCompatActivity() {
 
         createPuzzleController = CreatePuzzleController(this)
         puzzleDisplayController = PuzzleDisplayController(this)
+        wordLookupController = WordLookupController(this)
+        customKeyboardController = CustomKeyboardController(this)
 
         if (savedInstanceState != null) {
             restoreState(savedInstanceState)
@@ -45,6 +58,7 @@ class MainActivity : AppCompatActivity() {
         controls.setNightMode(nightMode)
         puzzleDisplayController.nightModeChanged()
         createPuzzleController.nightModeChanged()
+        customKeyboardController.configChanged()
     }
 
     override fun onSaveInstanceState(savedInstanceState: Bundle) {
@@ -55,7 +69,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun saveState(bundle: Bundle) {
         val viewingPuzzle = controls.currentView == DisplayView.PUZZLE
-        bundle.putBoolean("viewingPuzzle", viewingPuzzle)
+        bundle.putString("view", controls.currentView.toString())
         puzzleDisplayController.saveState(bundle)
         if (!viewingPuzzle) {
             createPuzzleController.saveState(bundle)
@@ -63,14 +77,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun restoreState(bundle: Bundle) {
-        val viewingPuzzle = bundle.getBoolean("viewingPuzzle", true)
+        val view = DisplayView.valueOf(bundle.getString("view", DisplayView.PUZZLE.toString()))
         puzzleDisplayController.restoreState(bundle)
-        if (!viewingPuzzle) {
-            createPuzzleController.restoreState(bundle)
-            controls.show(DisplayView.CREATE)
-        } else {
-            controls.show(DisplayView.PUZZLE)
+        when (view) {
+            DisplayView.CREATE -> {
+                createPuzzleController.restoreState(bundle)
+                controls.show(DisplayView.CREATE)
+            }
+            else -> controls.show(view)
         }
+        customKeyboardController.configChanged()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -85,6 +101,7 @@ class MainActivity : AppCompatActivity() {
             R.id.hints_switch -> {
                 puzzleDisplayController.hintsToggle()
                 item.isChecked = puzzleDisplayController.isHintsOn
+                customKeyboardController.hintsChanged(puzzleDisplayController.isHintsOn)
                 true
             }
             R.id.action_new_puzzle -> {
@@ -93,6 +110,10 @@ class MainActivity : AppCompatActivity() {
             }
             R.id.help_item -> {
                 controls.show(DisplayView.HELP)
+                true
+            }
+            R.id.word_lookup_item -> {
+                controls.show(DisplayView.WORD_LOOKUP)
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -116,5 +137,9 @@ class MainActivity : AppCompatActivity() {
         val solutions = solver.solve().sorted()
         val puzzle = Puzzle(dictionary, startWord, endWord, ladderLength, solutions)
         puzzleDisplayController.show(puzzle)
+    }
+
+    fun lookupWord(word: Word?, enteredWord: String?) {
+        wordLookupController.lookupWord(word, enteredWord)
     }
 }

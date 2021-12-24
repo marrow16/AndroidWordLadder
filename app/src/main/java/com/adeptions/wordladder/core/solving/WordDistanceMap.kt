@@ -51,4 +51,14 @@ class WordDistanceMap(word: Word) {
         return (distance != -1
                 && distance + existingSize <= maximumLadderLength)
     }
+
+    val minimum: Int
+        get() {
+            return distances.values.stream().min { o1, o2 -> compareValues(o1, o2) }.orElse(0)
+        }
+
+    val maximum: Int
+        get() {
+            return distances.values.stream().max { o1, o2 -> compareValues(o1, o2) }.orElse(0)
+        }
 }

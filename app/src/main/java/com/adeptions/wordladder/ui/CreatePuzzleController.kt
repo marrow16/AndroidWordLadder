@@ -3,30 +3,30 @@ package com.adeptions.wordladder.ui
 import android.os.Bundle
 import android.text.Editable
 import android.text.InputFilter
-import android.text.TextWatcher
 import android.view.Gravity
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.EditText
-import android.widget.Toast
+import androidx.core.widget.addTextChangedListener
 import com.adeptions.wordladder.*
 import com.adeptions.wordladder.core.solving.WordDistanceMap
 import com.adeptions.wordladder.core.words.Dictionary
 import com.adeptions.wordladder.core.words.MAX_WORD_LENGTH
 import com.adeptions.wordladder.core.words.MIN_WORD_LENGTH
 import com.adeptions.wordladder.core.words.Word
+import java.text.DecimalFormat
 import java.util.*
 
 const val MIN_LADDER_LENGTH: Int = 3
 val MAX_LADDER_LENGTHS = arrayOf(
     5,  // 2-letter
     9,  // 3-letter
-    15, // 4-letter - actual max is 16, but it takes too long to find them
-    19, // 5-letter
-    36, // 6-letter - limited for performance
-    50, // 7-letter - limited to reasonable
-    50, // 8-letter - limited to reasonable
+    16, // 4-letter
+    27, // 5-letter
+    43, // 6-letter
+    65, // 7-letter
+    80, // 8-letter
     34, // 9-letter
     11, // 10-letter
     27, // 11-letter
@@ -42,6 +42,7 @@ class CreatePuzzleController(private val main: MainActivity) {
     private var wordLength: Int = main.wordLength
     private var dictionary: Dictionary = main.dictionary
     private val controls: MainActivityControls = main.controls
+    private val countFormatter = DecimalFormat("#,##0")
 
     private lateinit var ladderLengthSpinnerAdapters: Array<ArrayAdapter<Int>>
 
@@ -53,28 +54,34 @@ class CreatePuzzleController(private val main: MainActivity) {
         controls.randomStartWordButton.setOnClickListener { onRandomStartWordClick() }
         controls.randomEndWordButton.setOnClickListener { onRandomEndWordClick() }
 
-        controls.startWordEdit.addTextChangedListener( object: TextWatcher {
-            override fun afterTextChanged(s: Editable?) {
-                onStartEndWordChanged(controls.startWordEdit, s)
-            }
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        controls.startWordEdit.addTextChangedListener(afterTextChanged = { s: Editable? ->
+            onStartEndWordChanged(controls.startWordEdit)
         })
         controls.startWordEdit.filters = arrayOf(InputFilter.LengthFilter(wordLength), InputFilter.AllCaps())
-        controls.endWordEdit.addTextChangedListener(object: TextWatcher {
-            override fun afterTextChanged(s: Editable?) {
-                onStartEndWordChanged(controls.endWordEdit, s)
-            }
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
+        controls.endWordEdit.addTextChangedListener(afterTextChanged = { s: Editable? ->
+            onStartEndWordChanged(controls.endWordEdit)
         })
         controls.endWordEdit.filters = arrayOf(InputFilter.LengthFilter(wordLength), InputFilter.AllCaps())
+
+        controls.startWordEdit.setOnLongClickListener(View.OnLongClickListener { v: View? ->
+            showWordMeaning(controls.startWordEdit)
+            true})
+        controls.endWordEdit.setOnLongClickListener(View.OnLongClickListener { v: View? ->
+            showWordMeaning(controls.endWordEdit)
+            true})
+
+    }
+
+    private fun showWordMeaning(edit: EditText) {
+        main.lookupWord(dictionary[edit.text.toString()], edit.text.toString())
     }
 
     fun show() {
         controls.show(DisplayView.CREATE)
         wordLength = main.wordLength
         dictionary = main.dictionary
+        controls.dictionaryWordCount.setText(countFormatter.format(dictionary.size) + " words")
         resetControls(main.ladderLength)
     }
 
@@ -83,32 +90,46 @@ class CreatePuzzleController(private val main: MainActivity) {
         controls.endWordEdit.setBackgroundResource(controls.backgroundNormal)
     }
 
-    private fun onStartEndWordChanged(edit: EditText, s: Editable?) {
-        if (s != null) {
-            if (s.length == 0) {
-                edit.setBackgroundResource(controls.backgroundNormal)
-            } else if (s.length == wordLength) {
-                if (s.toString() !in dictionary) {
-                    edit.setBackgroundResource(controls.backgroundError)
-                    val toast: Toast = Toast.makeText(main, "Can't find \"$s\" in my dictionary!",
-                        Toast.LENGTH_LONG)
-                    toast.setGravity(Gravity.TOP + Gravity.LEFT, edit.x.toInt(), edit.y.toInt() + 48)
-                    toast.show()
-                } else {
-                    edit.setBackgroundResource(controls.backgroundNormal)
-                }
+    private fun onStartEndWordChanged(edit: EditText) {
+        val text = edit.text.toString()
+        if (text.isEmpty()) {
+            edit.setBackgroundResource(controls.backgroundNormal)
+        } else if (text == "?") {
+            if (edit == controls.startWordEdit) {
+                onRandomStartWordClick()
             } else {
-                edit.setBackgroundResource(controls.backgroundWarning)
+                onRandomEndWordClick()
             }
+        } else if (text.length == wordLength) {
+            val word: Word? = dictionary[text]
+            if (word == null) {
+                edit.setBackgroundResource(controls.backgroundError)
+                showHintForStartEndWordEdit(edit, "Can't find \"$text\" in my dictionary!")
+            } else {
+                edit.setBackgroundResource(controls.backgroundNormal)
+            }
+        } else {
+            edit.setBackgroundResource(controls.backgroundWarning)
         }
     }
 
-    private fun onWordLengthSelected(wordLength: Int) {
-        if (this.wordLength != wordLength) {
-            this.wordLength = wordLength
-            dictionary = Dictionary.Factory.forWordLength(main.resources, wordLength)
-            updateCreationControls()
+    private fun showHintForStartEndWordEdit(edit: EditText, message: String) {
+        val yPosition:Int = edit.y.toInt() - controls.createScroller.scrollY
+        showToast(message, edit.x.toInt(), yPosition)
+    }
+
+    private fun showToast(message: String) {
+        showToast(message, null, null)
+    }
+
+    private fun showToast(message: String, xPos: Int?, yPos: Int?) {
+        controls.cancelToaster()
+        val toast = controls.createToaster()
+        toast.setText(message)
+        if (xPos != null && yPos != null) {
+            toast.setGravity(Gravity.TOP + Gravity.LEFT, xPos, yPos)
         }
+        toast.show()
     }
 
     private fun setCreateControlsEnabled(enabled: Boolean) {
@@ -140,6 +161,26 @@ class CreatePuzzleController(private val main: MainActivity) {
         }
 
         controls.ladderLengthSpinner.adapter = ladderLengthSpinnerAdapters[main.wordLength - MIN_WORD_LENGTH]
+        controls.ladderLengthSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                onLadderLengthSelected(position + MIN_LADDER_LENGTH)
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) { }
+        }
+    }
+
+    private fun onWordLengthSelected(wordLength: Int) {
+        if (this.wordLength != wordLength) {
+            this.wordLength = wordLength
+            dictionary = Dictionary.Factory.forWordLength(main.resources, wordLength)
+            controls.dictionaryWordCount.setText(countFormatter.format(dictionary.size) + " words")
+            updateCreationControls()
+        }
+    }
+
+    private fun onLadderLengthSelected(ladderLength: Int) {
+        val count = dictionary.wordCountsByLadderLength(ladderLength)
+        controls.ladderLengthWordCount.setText(countFormatter.format(count) + " words")
     }
 
     private fun resetControls(ladderLength: Int) {
@@ -195,34 +236,48 @@ class CreatePuzzleController(private val main: MainActivity) {
                 puzzleEndWord = word
             }
             if (puzzleStartWord != null && puzzleEndWord != null) {
+                if (puzzleStartWord.differences(puzzleEndWord) < 2) {
+                    throw Exception("Start and end word must be at least two characters difference")
+                }
                 val distanceMap = WordDistanceMap(puzzleStartWord)
                 val distance: Int = distanceMap.getDistance(puzzleEndWord)
                     ?: throw Exception("Cannot reach end word \"$endWordEntry\" from start word \"$startWordEntry\"")
                 if (distance != ladderLength) {
                     ladderLength = distance
                     selectedLadderLength = ladderLength
-                    throw Exception("Ladder length changed automatically - press 'Create' again")
+                    throw Exception("Ladder steps changed automatically - press 'CREATE' again")
                 }
             } else if (puzzleStartWord != null) {
                 val distanceMap = WordDistanceMap(puzzleStartWord)
                 val possibles = distanceMap.findAtDistance(ladderLength)
                 if (possibles.isEmpty()) {
-                    throw Exception("No words at ladder length $ladderLength can be reached from start word \"$startWordEntry\"")
+                    val max = distanceMap.maximum
+                    if (max >= MIN_LADDER_LENGTH) {
+                        selectedLadderLength = max
+                        throw Exception("Ladder steps changed automatically - press 'CREATE' again")
+                    } else {
+                        throw Exception("Sorry, just cannot create a useful puzzle using start word \"$startWordEntry\"")
+                    }
                 }
                 puzzleEndWord = possibles[RANDOM.nextInt(possibles.size)]
             } else if (puzzleEndWord != null) {
                 val distanceMap = WordDistanceMap(puzzleEndWord)
                 val possibles = distanceMap.findAtDistance(ladderLength)
                 if (possibles.isEmpty()) {
-                    throw Exception("No words at ladder length $ladderLength can be reached from end word \"$endWordEntry\"")
+                    val max = distanceMap.maximum
+                    if (max >= MIN_LADDER_LENGTH) {
+                        selectedLadderLength = max
+                        throw Exception("Ladder steps changed automatically - press 'CREATE' again")
+                    } else {
+                        throw Exception("Sorry, just cannot create a useful puzzle using end word \"$endWordEntry\"")
+                    }
                 }
                 puzzleStartWord = possibles[RANDOM.nextInt(possibles.size)]
             }
-
             isOk = true
         } catch (e: Exception) {
             isOk = false
-            Toast.makeText(main, e.message, Toast.LENGTH_LONG).show()
+            showToast(e.message?: "Internal Error")
         } finally {
             setCreateControlsEnabled(true)
         }
@@ -236,7 +291,7 @@ class CreatePuzzleController(private val main: MainActivity) {
             } else if (main.generatePuzzle()) {
                 controls.show(DisplayView.PUZZLE)
             } else {
-                Toast.makeText(main, "Sorry, couldn't seem to generate a puzzle - please try again", Toast.LENGTH_LONG).show()
+                showToast("Sorry, couldn't seem to generate a puzzle - please try again")
             }
         }
     }
@@ -246,13 +301,35 @@ class CreatePuzzleController(private val main: MainActivity) {
     }
 
     private fun onRandomStartWordClick() {
-        val words: List<Word> = dictionary.nonIslandWords
-        controls.startWordEdit.setText(words[RANDOM.nextInt(words.size)].toString())
+        val endWordEntry: String = controls.endWordEdit.text.toString()
+        val endWord: Word? = dictionary[endWordEntry]
+        val words = if (endWord != null) {
+            val distanceMap = WordDistanceMap(endWord)
+            distanceMap.findAtDistance(selectedLadderLength)
+        } else {
+            dictionary.wordsWithLadderLength(selectedLadderLength)
+        }
+        if (words.isNotEmpty()) {
+            controls.startWordEdit.setText(words[RANDOM.nextInt(words.size)].toString())
+        } else {
+            controls.startWordEdit.setText("")
+        }
     }
 
     private fun onRandomEndWordClick() {
-        val words: List<Word> = dictionary.nonIslandWords
-        controls.endWordEdit.setText(words[RANDOM.nextInt(words.size)].toString())
+        val startWordEntry: String = controls.startWordEdit.text.toString()
+        val startWord: Word? = dictionary[startWordEntry]
+        val words = if (startWord != null) {
+            val distanceMap = WordDistanceMap(startWord)
+            distanceMap.findAtDistance(selectedLadderLength)
+        } else {
+            dictionary.wordsWithLadderLength(selectedLadderLength)
+        }
+        if (words.isNotEmpty()) {
+            controls.endWordEdit.setText(words[RANDOM.nextInt(words.size)].toString())
+        } else {
+            controls.endWordEdit.setText("")
+        }
     }
 
     private var selectedWordLength: Int
@@ -264,12 +341,12 @@ class CreatePuzzleController(private val main: MainActivity) {
     private var selectedLadderLength: Int
         get() = controls.ladderLengthSpinner.selectedItemPosition + MIN_LADDER_LENGTH
         set(value) {
-            val newIndex = value - MIN_LADDER_LENGTH
-            if (newIndex >= controls.ladderLengthSpinner.adapter.count) {
-                controls.ladderLengthSpinner.setSelection(controls.ladderLengthSpinner.adapter.count - 1)
+            val newIndex = if ((value - MIN_LADDER_LENGTH) >= controls.ladderLengthSpinner.adapter.count) {
+                controls.ladderLengthSpinner.adapter.count - 1
             } else {
-                controls.ladderLengthSpinner.setSelection(newIndex)
+                value - MIN_LADDER_LENGTH
             }
+            controls.ladderLengthSpinner.setSelection(newIndex)
         }
 
     internal fun saveState(bundle: Bundle) {
@@ -283,6 +360,7 @@ class CreatePuzzleController(private val main: MainActivity) {
         wordLength = bundle.getInt("creatorWordLength", 3)
         dictionary = Dictionary.Factory.forWordLength(main.resources, wordLength)
         selectedWordLength = wordLength
+        controls.dictionaryWordCount.setText(countFormatter.format(dictionary.size) + " words")
         controls.ladderLengthSpinner.adapter = ladderLengthSpinnerAdapters[wordLength - MIN_WORD_LENGTH]
         selectedLadderLength = bundle.getInt("creatorLadderLength", 4)
         controls.startWordEdit.filters = arrayOf(InputFilter.LengthFilter(wordLength), InputFilter.AllCaps())

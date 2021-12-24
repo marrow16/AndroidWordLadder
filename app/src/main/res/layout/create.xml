@@ -9,6 +9,7 @@
     app:layout_constraintTop_toTopOf="parent">
 
     <ScrollView
+        android:id="@+id/create_scroller"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -35,14 +36,33 @@
                 android:text="@string/text_word_length"
                 android:textSize="24sp" />
 
-            <Spinner
-                android:id="@+id/spinner_word_length"
-                android:layout_width="200sp"
+            <TableLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@android:drawable/btn_dropdown"
-                android:contentDescription="@string/hint_word_length"
-                android:focusable="auto"
-                android:spinnerMode="dropdown" />
+                android:shrinkColumns="1"
+                android:stretchColumns="1">
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <Spinner
+                        android:id="@+id/spinner_word_length"
+                        android:layout_width="200sp"
+                        android:layout_height="wrap_content"
+                        android:background="@android:drawable/btn_dropdown"
+                        android:contentDescription="@string/hint_word_length"
+                        android:focusable="auto"
+                        android:spinnerMode="dropdown" />
+                    <TextView
+                        android:id="@+id/dictionary_word_count"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="bottom"
+                        android:gravity="center_vertical|right"
+                        android:text="(?) words"
+                        android:textSize="20sp" />
+                </TableRow>
+            </TableLayout>
 
             <Space
                 android:layout_width="match_parent"
@@ -54,14 +74,32 @@
                 android:text="@string/text_ladder_length"
                 android:textSize="24sp" />
 
-            <Spinner
-                android:id="@+id/spinner_ladder_length"
-                android:layout_width="200sp"
+            <TableLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@android:drawable/btn_dropdown"
-                android:contentDescription="@string/hint_ladder_length"
-                android:focusable="auto"
-                android:spinnerMode="dropdown" />
+                android:shrinkColumns="1"
+                android:stretchColumns="1">
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <Spinner
+                        android:id="@+id/spinner_ladder_length"
+                        android:layout_width="200sp"
+                        android:layout_height="wrap_content"
+                        android:background="@android:drawable/btn_dropdown"
+                        android:contentDescription="@string/hint_ladder_length"
+                        android:focusable="auto"
+                        android:spinnerMode="dropdown" />
+                    <TextView
+                        android:id="@+id/ladder_length_word_count"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="bottom"
+                        android:gravity="center_vertical|right"
+                        android:text="(?) words"
+                        android:textSize="20sp" />
+                </TableRow>
+            </TableLayout>
 
             <Space
                 android:layout_width="match_parent"
