@@ -18,7 +18,7 @@ class Solver(private val firstWord: Word, private val lastWord: Word, private va
             solved = true
         } else {
             // check for short-circuits...
-            when (beginWord.differences(endWord)) {
+            when (beginWord - endWord) {
                 0 -> {
                     // same word - so there's only one solution...
                     solutions.add(Solution(beginWord))
@@ -31,25 +31,24 @@ class Solver(private val firstWord: Word, private val lastWord: Word, private va
                         // maximum ladder is 2 so we already have the only answer...
                         solved = true
                     } else if (ladderLength == 3) {
-                        val startLinkedWords: MutableSet<Word> = HashSet(beginWord.linkedWords)
-                        startLinkedWords.retainAll(endWord.linkedWords)
-                        for (intermediateWord in startLinkedWords) {
-                            solutions.add(Solution(beginWord, intermediateWord, endWord))
-                        }
+                        shortCircuitLadderLength3()
                         solved = true
                     }
                 }
                 2 -> if (ladderLength == 3) {
-                    // the two words are only two letters different and maximum ladder is 3...
-                    // so we can determine solutions by convergence of the two linked word sets...
-                    val startLinkedWords: MutableSet<Word> = HashSet(beginWord.linkedWords)
-                    startLinkedWords.retainAll(endWord.linkedWords)
-                    for (intermediateWord in startLinkedWords) {
-                        solutions.add(Solution(beginWord, intermediateWord, endWord))
-                    }
+                    shortCircuitLadderLength3()
                     solved = true
                 }
             }
+        }
+    }
+
+    private fun shortCircuitLadderLength3() {
+        // we can determine solutions by convergence of the two linked word sets...
+        val startLinkedWords: MutableSet<Word> = HashSet(beginWord.linkedWords)
+        startLinkedWords.retainAll(endWord.linkedWords)
+        for (intermediateWord in startLinkedWords) {
+            solutions.add(Solution(beginWord, intermediateWord, endWord))
         }
     }
 
@@ -63,11 +62,10 @@ class Solver(private val firstWord: Word, private val lastWord: Word, private va
                 beginWord = lastWord
                 endWord = firstWord
             }
-            endDistances = WordDistanceMap(endWord)
-            endDistances.setMaximumLadderLength(ladderLength)
+            endDistances = WordDistanceMap(endWord, ladderLength - 1)
             beginWord.linkedWords
                 .parallelStream()
-                .filter { linkedWord -> endDistances.reachable(linkedWord) }
+                .filter { linkedWord -> endDistances.reachable(linkedWord, ladderLength) }
                 .map { linkedWord -> CandidateSolution(this, beginWord, linkedWord) }
                 .forEach(this::solve)
             solved = true
@@ -82,8 +80,8 @@ class Solver(private val firstWord: Word, private val lastWord: Word, private va
         } else if (candidate.ladder.size < ladderLength) {
             last.linkedWords
                 .parallelStream()
-                .filter { linkedWord -> !candidate.seenWords.contains(linkedWord) }
-                .filter { linkedWord -> endDistances.reachable(linkedWord, candidate.ladder.size) }
+                .filter { linkedWord -> !candidate.seenWords.contains(linkedWord)
+                        && endDistances.reachable(linkedWord, ladderLength, candidate.ladder.size) }
                 .map { linkedWord -> CandidateSolution(candidate, linkedWord) }
                 .forEach(this::solve)
         }

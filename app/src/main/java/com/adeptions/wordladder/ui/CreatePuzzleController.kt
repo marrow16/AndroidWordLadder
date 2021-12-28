@@ -54,20 +54,20 @@ class CreatePuzzleController(private val main: MainActivity) {
         controls.randomStartWordButton.setOnClickListener { onRandomStartWordClick() }
         controls.randomEndWordButton.setOnClickListener { onRandomEndWordClick() }
 
-        controls.startWordEdit.addTextChangedListener(afterTextChanged = { s: Editable? ->
+        controls.startWordEdit.addTextChangedListener(afterTextChanged = {
             onStartEndWordChanged(controls.startWordEdit)
         })
         controls.startWordEdit.filters = arrayOf(InputFilter.LengthFilter(wordLength), InputFilter.AllCaps())
 
-        controls.endWordEdit.addTextChangedListener(afterTextChanged = { s: Editable? ->
+        controls.endWordEdit.addTextChangedListener(afterTextChanged = {
             onStartEndWordChanged(controls.endWordEdit)
         })
         controls.endWordEdit.filters = arrayOf(InputFilter.LengthFilter(wordLength), InputFilter.AllCaps())
 
-        controls.startWordEdit.setOnLongClickListener(View.OnLongClickListener { v: View? ->
+        controls.startWordEdit.setOnLongClickListener(View.OnLongClickListener {
             showWordMeaning(controls.startWordEdit)
             true})
-        controls.endWordEdit.setOnLongClickListener(View.OnLongClickListener { v: View? ->
+        controls.endWordEdit.setOnLongClickListener(View.OnLongClickListener {
             showWordMeaning(controls.endWordEdit)
             true})
 
@@ -236,10 +236,10 @@ class CreatePuzzleController(private val main: MainActivity) {
                 puzzleEndWord = word
             }
             if (puzzleStartWord != null && puzzleEndWord != null) {
-                if (puzzleStartWord.differences(puzzleEndWord) < 2) {
+                if ((puzzleStartWord - puzzleEndWord) < 2) {
                     throw Exception("Start and end word must be at least two characters difference")
                 }
-                val distanceMap = WordDistanceMap(puzzleStartWord)
+                val distanceMap = WordDistanceMap(puzzleStartWord, null)
                 val distance: Int = distanceMap.getDistance(puzzleEndWord)
                     ?: throw Exception("Cannot reach end word \"$endWordEntry\" from start word \"$startWordEntry\"")
                 if (distance != ladderLength) {
@@ -248,7 +248,7 @@ class CreatePuzzleController(private val main: MainActivity) {
                     throw Exception("Ladder steps changed automatically - press 'CREATE' again")
                 }
             } else if (puzzleStartWord != null) {
-                val distanceMap = WordDistanceMap(puzzleStartWord)
+                val distanceMap = WordDistanceMap(puzzleStartWord, null)
                 val possibles = distanceMap.findAtDistance(ladderLength)
                 if (possibles.isEmpty()) {
                     val max = distanceMap.maximum
@@ -261,7 +261,7 @@ class CreatePuzzleController(private val main: MainActivity) {
                 }
                 puzzleEndWord = possibles[RANDOM.nextInt(possibles.size)]
             } else if (puzzleEndWord != null) {
-                val distanceMap = WordDistanceMap(puzzleEndWord)
+                val distanceMap = WordDistanceMap(puzzleEndWord, null)
                 val possibles = distanceMap.findAtDistance(ladderLength)
                 if (possibles.isEmpty()) {
                     val max = distanceMap.maximum
@@ -304,7 +304,7 @@ class CreatePuzzleController(private val main: MainActivity) {
         val endWordEntry: String = controls.endWordEdit.text.toString()
         val endWord: Word? = dictionary[endWordEntry]
         val words = if (endWord != null) {
-            val distanceMap = WordDistanceMap(endWord)
+            val distanceMap = WordDistanceMap(endWord, null)
             distanceMap.findAtDistance(selectedLadderLength)
         } else {
             dictionary.wordsWithLadderLength(selectedLadderLength)
@@ -320,7 +320,7 @@ class CreatePuzzleController(private val main: MainActivity) {
         val startWordEntry: String = controls.startWordEdit.text.toString()
         val startWord: Word? = dictionary[startWordEntry]
         val words = if (startWord != null) {
-            val distanceMap = WordDistanceMap(startWord)
+            val distanceMap = WordDistanceMap(startWord, null)
             distanceMap.findAtDistance(selectedLadderLength)
         } else {
             dictionary.wordsWithLadderLength(selectedLadderLength)

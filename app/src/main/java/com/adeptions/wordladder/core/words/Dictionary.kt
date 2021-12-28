@@ -21,11 +21,10 @@ class Dictionary(res: Resources, val wordLength: Int) {
     private val wordsByLadderLength: MutableMap<Int, List<Word>> = HashMap()
 
     init {
-        loadWordsFromResources(res)
-        buildWordVariations()
+        loadWordsFromResources(res, WordLinkageBuilder())
     }
 
-    private fun addWord(line: String) {
+    private fun addWord(line: String, linkageBuilder: WordLinkageBuilder) {
         if (line.isNotEmpty()) {
             val firstTab = line.indexOf('\t')
             val actualWord = line.substring(0, firstTab)
@@ -36,33 +35,16 @@ class Dictionary(res: Resources, val wordLength: Int) {
                             + actualWord.length + ") cannot be loaded into " + wordLength + " letter word dictionary"
                 )
             }
-            wordsMap[actualWord] = Word(actualWord, maxSteps)
+            val word = Word(actualWord, maxSteps)
+            wordsMap[word.actualWord] = word
+            linkageBuilder.link(word)
             for (i in 2 until maxSteps + 1) {
                 wordCountsByLadderLength.computeIfAbsent(i) { _ -> AtomicInteger(0)}.incrementAndGet()
             }
         }
     }
 
-    private fun buildWordVariations() {
-        val variations: MutableMap<String, MutableList<Word>> = HashMap()
-        wordsMap.values
-            .forEach(Consumer { word: Word ->
-                word.variationPatterns
-                    .forEach { variationPattern ->
-                        variations.computeIfAbsent(
-                            variationPattern
-                        ) { s: String? -> ArrayList() }
-                            .add(word)
-                    }
-            })
-        variations.values
-            .forEach(Consumer<List<Word>> { wordVariants: List<Word> ->
-                wordVariants.forEach(
-                    Consumer { word: Word -> word.addLinkedWords(wordVariants) })
-            })
-    }
-
-    private fun loadWordsFromResources(resources: Resources) {
+    private fun loadWordsFromResources(resources: Resources, linkageBuilder: WordLinkageBuilder) {
         val ids = intArrayOf(
             R.raw.dict_2_letter_words,
             R.raw.dict_3_letter_words,
@@ -82,9 +64,9 @@ class Dictionary(res: Resources, val wordLength: Int) {
         val id = ids[wordLength - 2]
         resources.openRawResource(id).use { inputStream: InputStream ->
             BufferedReader(InputStreamReader(inputStream)).use { br: BufferedReader ->
-                var line: String? = null
+                var line: String?
                 while (br.readLine().also { line = it } != null) {
-                    addWord(line?: "")
+                    addWord(line?: "", linkageBuilder)
                 }
             }
         }
@@ -117,6 +99,24 @@ class Dictionary(res: Resources, val wordLength: Int) {
 
     operator fun contains(word: String): Boolean {
         return wordsMap.containsKey(word.uppercase())
+    }
+
+    private class WordLinkageBuilder {
+        private val variations: MutableMap<String, MutableList<Word>> = HashMap()
+
+        fun link(word: Word) {
+            word.variationPatterns.forEach { variation ->
+                val links = variations.computeIfAbsent(variation) { ArrayList() }
+                links.forEach { linkedWord ->
+                    // add the new word as linked to the existing words...
+                    linkedWord.links.add(word)
+                    // add the existing word as linked to the new word...
+                    word.links.add(linkedWord)
+                }
+                // add the new word to the list of words of this pattern...
+                links.add(word)
+            }
+        }
     }
 
     object Factory {

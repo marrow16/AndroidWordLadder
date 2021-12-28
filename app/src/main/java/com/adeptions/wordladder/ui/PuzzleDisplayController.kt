@@ -363,7 +363,7 @@ class PuzzleDisplayController(val main: MainActivity) {
                             background = controls.backgroundGood
                         }
                         var differencesOk = true
-                        if (previousWord != null && word.differences(previousWord) != 1) {
+                        if (previousWord != null && (word - previousWord) != 1) {
                             background = warningBackground
                             addToOkCount = 0
                             differencesOk = false
@@ -380,7 +380,7 @@ class PuzzleDisplayController(val main: MainActivity) {
                             } else {
                                 puzzle.dictionary[controls.puzzleEdits[i + 1].text.toString()]
                             }
-                            if (nextWord != null && word.differences(nextWord) != 1) {
+                            if (nextWord != null && (word - nextWord) != 1) {
                                 background = warningBackground
                                 addToOkCount = 0
                                 differencesOk = false

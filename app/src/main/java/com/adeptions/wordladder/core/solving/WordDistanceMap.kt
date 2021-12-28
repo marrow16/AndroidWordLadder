@@ -5,33 +5,35 @@ import java.util.*
 import java.util.Map
 import kotlin.streams.toList
 
-class WordDistanceMap(word: Word) {
+class WordDistanceMap(word: Word, maximumLadderLength: Int?) {
     private val distances: MutableMap<Word, Int> = HashMap<Word, Int>()
-    private var maximumLadderLength = 0
+//    private var maximumLadderLength = 0
 
     init {
+        val maxDistance = maximumLadderLength?: Int.MAX_VALUE
         distances[word] = 1
         val queue: Queue<Word> = ArrayDeque()
         queue.add(word)
         while (!queue.isEmpty()) {
             val nextWord: Word = queue.remove()
-            nextWord.linkedWords.stream()
-                .filter { linkedWord -> !distances.containsKey(linkedWord) }
-                .forEach { linkedWord ->
-                    queue.add(linkedWord)
-                    distances.computeIfAbsent(linkedWord) { w: Word? ->
-                        1 + distances[nextWord]!!
+            val distance = distances.getOrDefault(nextWord, 0) + 1
+            if (distance <= maxDistance) {
+                nextWord.linkedWords.stream()
+                    .filter { linkedWord -> !distances.containsKey(linkedWord) }
+                    .forEach { linkedWord ->
+                        queue.add(linkedWord)
+                        distances.computeIfAbsent(linkedWord) { distance }
                     }
-                }
+            }
         }
     }
 
     fun getDistance(toWord: Word): Int? =
         distances[toWord]
 
-    fun setMaximumLadderLength(maximumLadderLength: Int) {
-        this.maximumLadderLength = maximumLadderLength
-    }
+//    fun setMaximumLadderLength(maximumLadderLength: Int) {
+//        this.maximumLadderLength = maximumLadderLength
+//    }
 
     fun findAtDistance(distance: Int): List<Word> {
         return distances.entries.stream()
@@ -40,6 +42,15 @@ class WordDistanceMap(word: Word) {
             .toList()
     }
 
+    fun reachable(word: Word, maximumLadderLength: Int): Boolean {
+        return (distances[word]?.compareTo(maximumLadderLength) ?: 1) < 1
+    }
+
+    fun reachable(word: Word, maximumLadderLength: Int, currentLadderLength: Int): Boolean {
+        return (distances[word]?.compareTo(maximumLadderLength - currentLadderLength) ?: 1) < 1
+    }
+
+/*
     fun reachable(word: Word): Boolean {
         val distance = distances.getOrDefault(word, -1)
         return (distance != -1
@@ -51,6 +62,7 @@ class WordDistanceMap(word: Word) {
         return (distance != -1
                 && distance + existingSize <= maximumLadderLength)
     }
+ */
 
     val minimum: Int
         get() {

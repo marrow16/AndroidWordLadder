@@ -13,7 +13,7 @@ class Generator(private val dictionary: Dictionary, private val ladderLength: In
             throw Exception("Oops! Sorry, couldn't generate word ladder")
         }
         val firstWord = words[RANDOM.nextInt(words.size)]
-        val distanceMap = WordDistanceMap(firstWord)
+        val distanceMap = WordDistanceMap(firstWord, null)
         val lastWords = distanceMap.findAtDistance(ladderLength)
         if (lastWords.isEmpty()) {
             throw Exception("Oops! Sorry, couldn't generate word ladder")

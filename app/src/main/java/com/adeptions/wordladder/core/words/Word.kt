@@ -5,18 +5,10 @@ import kotlin.streams.toList
 private const val VARIATION_CHAR = '_'
 
 class Word(actualWord: String, private val maxSteps: Int) {
-    private val actualWord = actualWord.uppercase()
+    internal val actualWord = actualWord.uppercase()
     private val wordChars = this.actualWord.toCharArray()
     private val hash = this.actualWord.hashCode()
-    private val links: MutableList<Word> = ArrayList()
-
-    fun addLinkedWords(variants: List<Word>) {
-        links.addAll(
-            variants.stream()
-                .filter { word -> this != word }
-                .toList()
-        )
-    }
+    internal val links: MutableList<Word> = ArrayList()
 
     val variationPatterns: List<String>
         get() = List(wordChars.size) { i ->
@@ -37,7 +29,20 @@ class Word(actualWord: String, private val maxSteps: Int) {
     val linkedWords: List<Word>
         get() = this.links
 
+/*
     fun differences(other: Word): Int {
+        var result = 0
+        for (ch in wordChars.indices) {
+            result += if (wordChars[ch] != other.wordChars[ch]) 1 else 0
+        }
+        return result
+    }
+ */
+
+    /**
+     * Subtracting one word from another calculates differences
+     */
+    operator fun minus(other: Word): Int {
         var result = 0
         for (ch in wordChars.indices) {
             result += if (wordChars[ch] != other.wordChars[ch]) 1 else 0
