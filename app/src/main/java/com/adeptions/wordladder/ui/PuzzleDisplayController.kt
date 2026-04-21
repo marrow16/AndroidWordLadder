@@ -265,7 +265,8 @@ class PuzzleDisplayController(val main: MainActivity) {
                             append(letters[i])
                         }
                     }
-                    if (puzzle.deduct(Puzzle.DeductionType.LETTER_HINT, position, -1)) {
+//                    if (puzzle.deduct(Puzzle.DeductionType.LETTER_HINT, position, -1)) {
+                    if (puzzle.deduct(Puzzle.DeductionType.LETTER_HINT, position, fullStopAt)) {
                         updatePointsRemaining()
                     }
                     showHintForLadderWord(position, edit, tryText)
