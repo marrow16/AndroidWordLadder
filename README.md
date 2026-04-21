@@ -1,5 +1,12 @@
 # Android Word Ladder
 
+## Screen shots
+
+![Chart](./_images/screenshot_1.png) ![Chart](./_images/screenshot_2.png) ![Chart](./_images/screenshot_3.png) ![Chart](./_images/screenshot_4.png)
+
+
+## Analysis Report
+
 ### Word Statistics
 
 * Islands - are words that changing any letter will not form another word
@@ -31,6 +38,9 @@ Observation notes:
 1. word - islands = ladder length 2 words
 2. word - islands - doublets = ladder length 3 words
 
+
+![Chart](./_images/analysis.png)
+
 ### Adjacent Words Counts
 
 This table shows the spread of adjacent word counts for each word in the dictionary.
@@ -52,6 +62,8 @@ This table shows the spread of adjacent word counts for each word in the diction
 |      13 | 10281 |  3216 |   675 |   146 |    23 |     4 |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |
 |      14 |  6788 |  2003 |   488 |    91 |    19 |     8 |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |
 |      15 |  4273 |  1358 |   255 |    34 |     5 |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |
+
+![Chart](./images/adjacents.png)
 
 ### Longest Ladders
 
