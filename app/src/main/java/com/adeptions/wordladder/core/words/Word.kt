@@ -29,16 +29,6 @@ class Word(actualWord: String, private val maxSteps: Int) {
     val linkedWords: List<Word>
         get() = this.links
 
-/*
-    fun differences(other: Word): Int {
-        var result = 0
-        for (ch in wordChars.indices) {
-            result += if (wordChars[ch] != other.wordChars[ch]) 1 else 0
-        }
-        return result
-    }
- */
-
     /**
      * Subtracting one word from another calculates differences
      */

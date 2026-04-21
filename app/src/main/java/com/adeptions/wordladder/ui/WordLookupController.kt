@@ -23,9 +23,13 @@ import android.view.View
 import android.widget.TableRow
 import com.adeptions.wordladder.core.words.Dictionary
 import java.lang.Exception
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 
-private const val WORD_LOOKUP_API_URL = "https://unikove.com/projects/scrabble_widget/scrabble_api.php"
-private const val API_PARAM = "?word="
+
+private const val WORD_LOOKUP_API_URL = "https://freedictionaryapi.com/api/v1/entries"
+private const val WORD_LOOKUP_API_URL2 = "https://api.dictionaryapi.dev/api/v2/entries"
+private const val API_PARAM = "/en/"
 
 class WordLookupController(val main: MainActivity) {
     val controls: MainActivityControls = main.controls
@@ -87,6 +91,7 @@ class WordLookupController(val main: MainActivity) {
         controls.lookupLoading.visibility = View.VISIBLE
         controls.lookupErrorRow.visibility = View.GONE
         controls.lookupNotFoundRow.visibility = View.GONE
+        controls.lookupNotFound404Row.visibility = View.GONE
         controls.lookupOffensiveRow.visibility = View.GONE
         controls.lookupSeeAlsoRow.visibility = View.GONE
         for (tr: TableRow in controls.lookupMeaningHeaderRows) {
@@ -116,39 +121,53 @@ class WordLookupController(val main: MainActivity) {
         controls.lookupNotFoundRow.visibility = View.VISIBLE
     }
 
+    private fun endLoadingNotFound404() {
+        endLoading()
+        controls.lookupNotFound404Row.visibility = View.VISIBLE
+    }
+
     private fun showMeaning(meaning: WordMeaning) {
         endLoading()
-        for (i in 0 until Math.min(5, meaning.definitions.size)) {
-            val definition = meaning.definitions[i]
+        for (i in 0 until Math.min(5, meaning.list.size)) {
+            val definition = meaning.list[i]
             controls.lookupMeaningTypes[i].setText(definition.type?: "unknown")
-            controls.lookupMeaningDefinitions[i].setText(definition.text?: "Unknown meaning")
+            val textContent = buildString {
+                for (j in 0 until definition.meanings.size) {
+                    if (j > 0) {
+                        append("\n\n")
+                    }
+                    append("* ")
+                    append(definition.meanings[j])
+                }
+            }
+            controls.lookupMeaningDefinitions[i].setText(textContent)
             controls.lookupMeaningHeaderRows[i].visibility = View.VISIBLE
             controls.lookupMeaningDefinitionRows[i].visibility = View.VISIBLE
         }
-        if (meaning.crossRefs.isNotEmpty()) {
+
+        if (meaning.seeAlso.isNotEmpty()) {
             controls.lookupSeeAlsoRow.visibility = View.VISIBLE
             val textContent = buildString {
-                for (i in meaning.crossRefs.indices) {
+                for (i in meaning.seeAlso.indices) {
                     if (i > 0) {
                         append(" ")
                     }
-                    append(meaning.crossRefs[i].see!!.uppercase())
+                    append(meaning.seeAlso[i].uppercase())
                 }
             }
             val spannableContent = SpannableString(textContent)
             var start = 0
-            for (crossRef in meaning.crossRefs) {
-                val text = crossRef.see?: ""
+            for (also in meaning.seeAlso) {
                 val span: ClickableSpan = object : ClickableSpan() {
                     override fun updateDrawState(ds: TextPaint) {
                         ds.isUnderlineText = true
                     }
 
                     override fun onClick(widget: View) {
-                        onSeeAlsoClicked(text.uppercase())
+                        onSeeAlsoClicked(also.uppercase())
                     }
                 }
-                val end = start + text.length
+                val end = start + also.length
                 spannableContent.setSpan(span, start, end, 0)
                 start = end + 1
             }
@@ -156,6 +175,8 @@ class WordLookupController(val main: MainActivity) {
             controls.lookupSeeAlsos.movementMethod = LinkMovementMethod.getInstance()
             controls.lookupSeeAlsos.setText(spannableContent, BufferType.SPANNABLE)
         }
+        controls.customKeyboardContainer.visibility = View.GONE
+        controls.lookupWordEdit.clearFocus()
     }
 
     private fun onSeeAlsoClicked(see: String) {
@@ -173,127 +194,135 @@ class WordLookupController(val main: MainActivity) {
         main.requestQueue.cancelAll(null)
         startLoading()
         val stringRequest = StringRequest(
-            Request.Method.GET, WORD_LOOKUP_API_URL + API_PARAM + word.toString(),
+            Request.Method.GET, WORD_LOOKUP_API_URL + API_PARAM + word.toString().toLowerCase(),
             { response ->
                 parseResponse(response)
             },
             {
-                endLoadingError()
+                if (it.networkResponse.statusCode == 404) {
+                    endLoadingNotFound404()
+                } else {
+                    endLoadingError()
+                }
             })
         // Add the request to the RequestQueue.
         main.requestQueue.add(stringRequest)
     }
 
-    private fun parseResponse(response: String) {
-        if (response.startsWith("0")) {
-            endLoadingOffensive()
-        } else {
-            try {
-                val saxParserFactory: SAXParserFactory = SAXParserFactory.newInstance()
-                val saxParser: SAXParser = saxParserFactory.newSAXParser()
-                val xmlReader: XMLReader = saxParser.xmlReader
-                val meaningHandler = MeaningHTMLHandler()
-                xmlReader.contentHandler = meaningHandler
-                val stringReader = StringReader(response)
-                val inputSource = InputSource(stringReader)
-                xmlReader.parse(inputSource)
+    fun jsonToMap(json: String): Map<String, Any?> {
+        val type = object : TypeToken<Map<String, Any?>>() {}.type
+        return Gson().fromJson(json, type)
+    }
 
-                showMeaning(meaningHandler.meaning)
-            } catch (e: Exception) {
-                endLoadingError()
+    fun jsonArrayToList(json: String): List<Map<String, Any?>> {
+        val type = object : TypeToken<List<Map<String, Any?>>>() {}.type
+        return Gson().fromJson(json, type)
+    }
+
+    // freedictionaryapi.com
+    private fun parseResponse(response: String) {
+        try {
+            var obj: Map<String, Any?> = jsonToMap(response)
+            var entries: List<Map<String, Any?>> = obj.get("entries") as List<Map<String, Any?>>
+            if (entries.isEmpty()) {
+                endLoadingNotFound404()
+            } else {
+                val meaning = WordMeaning()
+                for (item: Map<String, Any?> in entries) {
+                    meaning.add(item)
+                }
+                showMeaning(meaning)
             }
+        } catch (e: Exception) {
+            endLoadingError()
         }
     }
 
-    private class MeaningHTMLHandler(): DefaultHandler() {
-        val meaning = WordMeaning()
-
-        private var onDefinition: WordDefinition? = null
-        private var onCrossRef: WordCrossRef? = null
-
-        private var inPos: Boolean = false
-        private var inDefinition: Boolean = false
-        private var inCrossLink: Boolean = false
-
-        override fun startElement(uri: String?, localName: String, qName: String?, attributes: Attributes?) {
-            val classVal: String = if (attributes != null) {
-                attributes.getValue("class")?: ""
-            } else {
-                ""
-            }
-            when (localName) {
-                "div" -> {
-                    if (classVal == "hom") {
-                        onDefinition = meaning.addDefinition()
-                    }
-                }
-                "span" -> {
-                    inPos = classVal == "pos"
-                    inDefinition = classVal == "def"
-                }
-                "a" -> {
-                    inCrossLink = attributes != null && (attributes.getValue("data-resource")?: "") == "scrabble"
-                    if (inCrossLink) {
-                        onCrossRef = meaning.addCrossRef()
+    // api.dictionaryapi.dev
+    private fun parseResponseAlt(response: String) {
+        try {
+            val arr: List<Map<String, Any?>> = jsonArrayToList(response)
+            val meaning = WordMeaning()
+            for (item: Map<String, Any?> in arr) {
+                var wd: Any? = item.get("word")
+                if (wd != null) {
+                    var ms: List<Map<String, Any?>>? = item.get("meanings") as List<Map<String, Any?>>?
+                    if (ms != null) {
+                        for (m: Map<String, Any?> in ms) {
+                            meaning.addAlt(m)
+                        }
                     }
                 }
             }
-        }
-
-        override fun endElement(uri: String?, localName: String?, qName: String?) {
-            inPos = false;
-            inDefinition = false
-            inCrossLink = false
-            onCrossRef = null
-        }
-
-        override fun characters(ch: CharArray?, start: Int, length: Int) {
-            val str = String(ch!!, start, length)
-            if (onDefinition != null && inPos) {
-                onDefinition!!.addType(str)
-            } else if (onDefinition != null && inDefinition) {
-                onDefinition!!.addText(str)
-            } else if (onCrossRef != null && inCrossLink) {
-                onCrossRef!!.addText(str)
-            }
+            showMeaning(meaning)
+        } catch (e: Exception) {
+            endLoadingError()
         }
     }
 
     private class WordMeaning() {
-        val definitions: MutableList<WordDefinition> = ArrayList()
-        val crossRefs: MutableList<WordCrossRef> = ArrayList()
+        val types: MutableMap<String,WordDefinitionType> = mutableMapOf()
+        val list: MutableList<WordDefinitionType> = ArrayList()
+        val seeAlso: MutableList<String> = mutableListOf()
 
-        fun addDefinition(): WordDefinition {
-            val result = WordDefinition()
-            definitions.add(result)
-            return result
+        fun add(m: Map<String, Any?>) {
+            val type: String? = m.get("partOfSpeech") as String?
+            val defs: List<Map<String, Any?>>? = m.get("senses") as List<Map<String, Any?>>?
+            if (type != null && defs != null && defs.size > 0) {
+                var wd: WordDefinitionType? = types.get(type)
+                if (wd == null) {
+                    wd = WordDefinitionType()
+                    wd.type = type
+                    types.put(type, wd)
+                    list.add(wd)
+                }
+                wd.add(defs)
+                addSeeAlsos(defs)
+            }
         }
 
-        fun addCrossRef(): WordCrossRef {
-            val result =  WordCrossRef()
-            crossRefs.add(result)
-            return result
+        fun addSeeAlsos(defs: List<Map<String, Any?>>) {
+            for (def: Map<String, Any?> in defs) {
+                val tags: List<String> = def.get("tags") as List<String>
+                for (tag: String in tags) {
+                    if (tag.equals("plural")) {
+                        val meaning: String? = def.get("definition") as String?
+                        if (meaning != null && meaning.startsWith("plural of ", true)) {
+                            //                                           1234567890
+                            seeAlso.add(meaning.substring(10))
+                        }
+                    }
+                }
+            }
+        }
+
+        fun addAlt(m: Map<String, Any?>) {
+            val type: String? = m.get("partOfSpeech") as String?
+            val defs: List<Map<String, Any?>>? = m.get("definitions") as List<Map<String, Any?>>?
+            if (type != null && defs != null && defs.size > 0) {
+                var wd: WordDefinitionType? = types.get(type)
+                if (wd == null) {
+                    wd = WordDefinitionType()
+                    wd.type = type
+                    types.put(type, wd)
+                    list.add(wd)
+                }
+                wd.add(defs)
+            }
         }
     }
 
-    private class WordDefinition {
+    private class WordDefinitionType {
         var type: String? = null
-        var text: String? = null
+        val meanings: MutableList<String> = ArrayList()
 
-        fun addType(str: String) {
-            type = type?:"" + str
-        }
-
-        fun addText(str: String) {
-            text = text?:"" + str
-        }
-    }
-
-    private class WordCrossRef {
-        var see: String? = null
-
-        fun addText(str: String) {
-            see = see?:"" + str
+        fun add(defs: List<Map<String, Any?>>) {
+            for (def: Map<String, Any?> in defs) {
+                val txt: String? = def.get("definition") as String?
+                if (txt != null) {
+                    meanings.add(txt)
+                }
+            }
         }
     }
 }

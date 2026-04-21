@@ -1,6 +1,7 @@
 package com.adeptions.wordladder
 
 import android.content.res.Configuration
+import android.content.res.Resources
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.*

@@ -87,7 +87,6 @@ class PuzzleDisplayController(val main: MainActivity) {
         this.puzzle = puzzle
         showingSolution = -1
         resetViews()
-        controls.pointsTotal.setText("" + puzzle.points)
         showSolutions(false)
         controls.show(DisplayView.PUZZLE)
         controls.solutionWords[0].requestFocus()
@@ -95,6 +94,8 @@ class PuzzleDisplayController(val main: MainActivity) {
 
     private fun resetViews() {
         internalUpdate = true
+        controls.pointsTotal.setText("Max: " + puzzle.points)
+        updatePointsRemaining()
         val emsLength = puzzle.wordLength
         controls.firstWordTextView.setEms(emsLength)
         controls.firstWordTextView.setBackgroundResource(controls.backgroundNormal)
@@ -124,6 +125,10 @@ class PuzzleDisplayController(val main: MainActivity) {
             }
         }
         internalUpdate = false
+    }
+
+    private fun updatePointsRemaining() {
+        controls.pointsRemaining.setText("Score: " + puzzle.pointsRemaining)
     }
 
     private fun onBeforeLadderWordChanged(edit: EditText, text: CharSequence?, start: Int, count: Int, after: Int) {
@@ -166,6 +171,9 @@ class PuzzleDisplayController(val main: MainActivity) {
 
     fun suggestWord(position: Int, edit: EditText, forced: Boolean) {
         if (hintsOn) {
+            if (puzzle.deduct(Puzzle.DeductionType.WORD_SUGGEST, position, -1)) {
+                updatePointsRemaining()
+            }
             val current = edit.text.toString()
             val new: String = if (!forced && current.length > 0) {
                 ""
@@ -192,6 +200,9 @@ class PuzzleDisplayController(val main: MainActivity) {
 
     private fun suggestLetterChanges(position: Int, edit: EditText) {
         if (hintsOn) {
+            if (puzzle.deduct(Puzzle.DeductionType.WORD_HINT, position, -1)) {
+                updatePointsRemaining()
+            }
             val previousWord = getPreviousWord(position, true)
             val nextWord = getNextWord(position, true)
             var template = puzzle.solutions[0][position].chars
@@ -253,6 +264,9 @@ class PuzzleDisplayController(val main: MainActivity) {
                             }
                             append(letters[i])
                         }
+                    }
+                    if (puzzle.deduct(Puzzle.DeductionType.LETTER_HINT, position, -1)) {
+                        updatePointsRemaining()
                     }
                     showHintForLadderWord(position, edit, tryText)
                     edit.setSelection(fullStopAt, fullStopAt + 1)
@@ -454,6 +468,9 @@ class PuzzleDisplayController(val main: MainActivity) {
             updateSolutionsHeader()
             controls.puzzleScroller.scrollY = sy
         } else {
+            if (puzzle.deduct(Puzzle.DeductionType.SOLUTIONS_LOOK, 0, -1)) {
+                updatePointsRemaining()
+            }
             val sy = controls.puzzleScroller.scrollY
             controls.puzzleLadderView.visibility = View.GONE
             controls.solutionLadderView.visibility = View.VISIBLE

@@ -45,6 +45,7 @@ class MainActivityControls(val main: MainActivity) {
     val lookupButton: Button = main.findViewById(R.id.button_lookup)
     val lookupErrorRow: TableRow = main.findViewById(R.id.lookup_error_row)
     val lookupNotFoundRow: TableRow = main.findViewById(R.id.lookup_not_found_row)
+    val lookupNotFound404Row: TableRow = main.findViewById(R.id.lookup_not_found_404_row)
     val lookupOffensiveRow: TableRow = main.findViewById(R.id.lookup_offensive_row)
     val lookupLoading: ProgressBar = main.findViewById(R.id.lookup_loading)
     val lookupSeeAlsoRow: TableRow = main.findViewById(R.id.lookup_see_also_row)

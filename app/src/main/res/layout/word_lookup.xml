@@ -340,6 +340,23 @@
             </TableRow>
 
             <TableRow
+                android:id="@+id/lookup_not_found_404_row"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Sorry, that word does exists in my dictionary but not in the online dictionary"
+                    android:textAlignment="center"
+                    android:textColor="@color/error"
+                    android:textSize="24sp"
+                    android:textStyle="italic" />
+            </TableRow>
+
+            <TableRow
                 android:id="@+id/lookup_offensive_row"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -355,6 +372,16 @@
                     android:textStyle="italic" />
             </TableRow>
 
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                tools:visibility="visible">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text=" "/>
+            </TableRow>
         </LinearLayout>
     </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>
