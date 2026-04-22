@@ -1838,4 +1838,26 @@
             android:textStyle="bold"
             android:typeface="monospace" />
     </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:visibility="visible">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text=" "/>
+    </TableRow>
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="end"
+        android:gravity="end">
+        <Button
+            android:id="@+id/button_new_puzzle"
+            android:layout_gravity="end"
+            android:layout_marginRight="8sp"
+            android:text="New"
+            android:textSize="24sp" />
+    </TableRow>
 </TableLayout>

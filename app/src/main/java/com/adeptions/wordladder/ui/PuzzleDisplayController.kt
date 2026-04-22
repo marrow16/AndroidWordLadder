@@ -84,6 +84,7 @@ class PuzzleDisplayController(val main: MainActivity) {
     }
 
     fun show(puzzle: Puzzle) {
+        this.hintsOn = this.main.hintsOn
         this.puzzle = puzzle
         showingSolution = -1
         resetViews()
@@ -437,8 +438,24 @@ class PuzzleDisplayController(val main: MainActivity) {
             for (i in 0 until puzzle.ladderLength - 2) {
                 controls.puzzleEdits[i].setBackgroundResource(controls.backgroundGood)
             }
-            //Toast.makeText(main, "You solved it!", Toast.LENGTH_SHORT).show()
-            controls.createToaster("You solved it!").show()
+            var message: String = ""
+            if (puzzle.points == puzzle.pointsRemaining) {
+                message = "Amazing!!\nYou solved it without any hints or help!\n\nScore "+puzzle.pointsRemaining.toString()
+            } else if (puzzle.pointsRemaining == 0) {
+                message = "You solved it (sort of?)\n\nNo Score (try with less hints & help)"
+            } else {
+                val pct: String = kotlin.math.ceil((puzzle.pointsRemaining.toDouble() / puzzle.points.toDouble()) * 100).toInt().toString()
+                message = "Well Done!\nYou solved it (with some help)\n\nScore " + puzzle.pointsRemaining.toString() + " ("+pct+"%)"
+            }
+            if (!puzzle.solved) {
+                puzzle.solved = true
+                if (main.newScore(puzzle.pointsRemaining, puzzle.points, puzzle.ladderLength, puzzle.startWord.actualWord, puzzle.endWord.actualWord)) {
+                    message += "\n\nAnd that's a new high score!!"
+                }
+            }
+            val toast: Toast = controls.createToaster(message)
+            toast.duration = Toast.LENGTH_LONG
+            toast.show()
         }
     }
 
@@ -582,6 +599,7 @@ class PuzzleDisplayController(val main: MainActivity) {
 
     internal fun hintsToggle() {
         hintsOn = !hintsOn
+        main.updateHintsPref(hintsOn)
         updateHints()
         showSolutions(false)
     }

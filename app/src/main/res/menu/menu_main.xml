@@ -19,8 +19,13 @@
         android:title="@string/word_lookup"
         app:showAsAction="never" />
     <item
-        android:id="@+id/help_item"
+        android:id="@+id/high_scores_item"
         android:orderInCategory="103"
+        android:title="@string/high_scores"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/help_item"
+        android:orderInCategory="104"
         android:title="@string/help"
         app:showAsAction="never" />
 </menu>

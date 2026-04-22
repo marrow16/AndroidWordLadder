@@ -282,14 +282,18 @@ class CreatePuzzleController(private val main: MainActivity) {
             setCreateControlsEnabled(true)
         }
         if (isOk) {
-            main.wordLength = wordLength
-            main.ladderLength = ladderLength
+            main.updatePrefs(wordLength, ladderLength)
+            //main.wordLength = wordLength
+            //main.ladderLength = ladderLength
             main.dictionary = dictionary
+
             if (puzzleStartWord != null && puzzleEndWord != null) {
                 main.showPuzzle(puzzleStartWord, puzzleEndWord)
                 controls.show(DisplayView.PUZZLE)
+                controls.puzzleEdits[0].requestFocus()
             } else if (main.generatePuzzle()) {
                 controls.show(DisplayView.PUZZLE)
+                controls.puzzleEdits[0].requestFocus()
             } else {
                 showToast("Sorry, couldn't seem to generate a puzzle - please try again")
             }

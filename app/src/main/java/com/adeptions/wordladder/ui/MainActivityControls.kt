@@ -17,6 +17,7 @@ class MainActivityControls(val main: MainActivity) {
     val createContainer: ConstraintLayout = main.findViewById(R.id.view_create)
     val helpContainer: ConstraintLayout = main.findViewById(R.id.view_help)
     val wordLokupContainer: ConstraintLayout = main.findViewById(R.id.view_word_lookup)
+    val highScoresContainer: ConstraintLayout = main.findViewById(R.id.view_high_scores)
     val customActionBar: Toolbar = main.findViewById(R.id.custom_actionbar)
     val customKeyboardContainer: ConstraintLayout = main.findViewById(R.id.custom_keyboard_display)
 
@@ -90,6 +91,7 @@ class MainActivityControls(val main: MainActivity) {
     val pointsRemaining: TextView = main.findViewById(R.id.points_remaining)
     val firstWordTextView: TextView = main.findViewById(R.id.puzzle_start_word)
     val endWordTextView: TextView = main.findViewById(R.id.puzzle_end_word)
+    val newPuzzleButton: Button = main.findViewById(R.id.button_new_puzzle)
     val puzzleRows: Array<TableRow> = arrayOf(
         main.findViewById(R.id.puzzle_row_01), main.findViewById(R.id.puzzle_row_02), main.findViewById(R.id.puzzle_row_03), main.findViewById(R.id.puzzle_row_04),
         main.findViewById(R.id.puzzle_row_05), main.findViewById(R.id.puzzle_row_06), main.findViewById(R.id.puzzle_row_07), main.findViewById(R.id.puzzle_row_08), main.findViewById(R.id.puzzle_row_09),
@@ -182,8 +184,59 @@ class MainActivityControls(val main: MainActivity) {
         main.findViewById(R.id.puzzle_word_70), main.findViewById(R.id.puzzle_word_71), main.findViewById(R.id.puzzle_word_72), main.findViewById(R.id.puzzle_word_73), main.findViewById(R.id.puzzle_word_74),
         main.findViewById(R.id.puzzle_word_75), main.findViewById(R.id.puzzle_word_76), main.findViewById(R.id.puzzle_word_77), main.findViewById(R.id.puzzle_word_78)
     )
-    var menu: Menu? = null
+    // high scores...
+    val highScoresClearButton: Button = main.findViewById(R.id.button_clear_high_scores)
+    val highScoresNoneRow: TableRow = main.findViewById(R.id.no_high_scores_row)
+    val highScoreHeaderRows: Array<TableRow> = arrayOf(
+        main.findViewById(R.id.high_score_header_row_1),
+        main.findViewById(R.id.high_score_header_row_2),
+        main.findViewById(R.id.high_score_header_row_3),
+        main.findViewById(R.id.high_score_header_row_4),
+        main.findViewById(R.id.high_score_header_row_5),
+        main.findViewById(R.id.high_score_header_row_6),
+        main.findViewById(R.id.high_score_header_row_7),
+        main.findViewById(R.id.high_score_header_row_8),
+        main.findViewById(R.id.high_score_header_row_9),
+        main.findViewById(R.id.high_score_header_row_10)
+    )
+    val highScoreValues: Array<TextView> = arrayOf(
+        main.findViewById(R.id.high_score_value_1),
+        main.findViewById(R.id.high_score_value_2),
+        main.findViewById(R.id.high_score_value_3),
+        main.findViewById(R.id.high_score_value_4),
+        main.findViewById(R.id.high_score_value_5),
+        main.findViewById(R.id.high_score_value_6),
+        main.findViewById(R.id.high_score_value_7),
+        main.findViewById(R.id.high_score_value_8),
+        main.findViewById(R.id.high_score_value_9),
+        main.findViewById(R.id.high_score_value_10)
+    )
+    val highScoreDetailRows: Array<TableRow> = arrayOf(
+        main.findViewById(R.id.high_score_detail_row_1),
+        main.findViewById(R.id.high_score_detail_row_2),
+        main.findViewById(R.id.high_score_detail_row_3),
+        main.findViewById(R.id.high_score_detail_row_4),
+        main.findViewById(R.id.high_score_detail_row_5),
+        main.findViewById(R.id.high_score_detail_row_6),
+        main.findViewById(R.id.high_score_detail_row_7),
+        main.findViewById(R.id.high_score_detail_row_8),
+        main.findViewById(R.id.high_score_detail_row_9),
+        main.findViewById(R.id.high_score_detail_row_10)
+    )
+    val highScoreDetails: Array<TextView> = arrayOf(
+        main.findViewById(R.id.high_score_detail_1),
+        main.findViewById(R.id.high_score_detail_2),
+        main.findViewById(R.id.high_score_detail_3),
+        main.findViewById(R.id.high_score_detail_4),
+        main.findViewById(R.id.high_score_detail_5),
+        main.findViewById(R.id.high_score_detail_6),
+        main.findViewById(R.id.high_score_detail_7),
+        main.findViewById(R.id.high_score_detail_8),
+        main.findViewById(R.id.high_score_detail_9),
+        main.findViewById(R.id.high_score_detail_10)
+    )
 
+    var menu: Menu? = null
     var toaster: Toast? = null
     var lastFocused: EditText? = null
     var viewSwitching: Boolean = false
@@ -246,6 +299,7 @@ class MainActivityControls(val main: MainActivity) {
             DisplayView.CREATE -> {
                 wordLokupContainer.visibility = View.GONE
                 helpContainer.visibility = View.GONE
+                highScoresContainer.visibility = View.GONE
                 puzzleContainer.visibility = View.GONE
                 createContainer.visibility = View.VISIBLE
                 customKeyboardContainer.visibility = View.VISIBLE
@@ -264,12 +318,29 @@ class MainActivityControls(val main: MainActivity) {
                 puzzleContainer.visibility = View.GONE
                 createContainer.visibility = View.GONE
                 customKeyboardContainer.visibility = View.GONE
+                highScoresContainer.visibility = View.GONE
                 helpContainer.visibility = View.VISIBLE
                 main.setTitle(R.string.actionbar_title_help)
                 if (main.supportActionBar != null) {
                     main.supportActionBar!!.hide()
                     customActionBar.visibility = View.VISIBLE
                     customActionBar.setTitle(R.string.actionbar_title_help)
+                } else {
+                    showMenu(false)
+                }
+            }
+            DisplayView.HIGH_SCORES -> {
+                wordLokupContainer.visibility = View.GONE
+                puzzleContainer.visibility = View.GONE
+                createContainer.visibility = View.GONE
+                customKeyboardContainer.visibility = View.GONE
+                helpContainer.visibility = View.GONE
+                highScoresContainer.visibility = View.VISIBLE
+                main.setTitle("Word Ladder - High Scores")
+                if (main.supportActionBar != null) {
+                    main.supportActionBar!!.hide()
+                    customActionBar.visibility = View.VISIBLE
+                    customActionBar.setTitle("Word Ladder - High Scores")
                 } else {
                     showMenu(false)
                 }
@@ -281,6 +352,7 @@ class MainActivityControls(val main: MainActivity) {
                 puzzleContainer.visibility = View.GONE
                 createContainer.visibility = View.GONE
                 helpContainer.visibility = View.GONE
+                highScoresContainer.visibility = View.GONE
                 customKeyboardContainer.visibility = View.VISIBLE
                 main.customKeyboardController.currentViewChanged(view)
                 wordLokupContainer.visibility = View.VISIBLE
@@ -296,6 +368,7 @@ class MainActivityControls(val main: MainActivity) {
             DisplayView.PUZZLE -> {
                 wordLokupContainer.visibility = View.GONE
                 helpContainer.visibility = View.GONE
+                highScoresContainer.visibility = View.GONE
                 createContainer.visibility = View.GONE
                 customKeyboardContainer.visibility = View.VISIBLE
                 main.customKeyboardController.currentViewChanged(view)

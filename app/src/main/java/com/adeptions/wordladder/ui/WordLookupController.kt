@@ -136,7 +136,7 @@ class WordLookupController(val main: MainActivity) {
                     if (j > 0) {
                         append("\n\n")
                     }
-                    append("* ")
+                    append("\u2022 ")
                     append(definition.meanings[j])
                 }
             }
@@ -162,7 +162,6 @@ class WordLookupController(val main: MainActivity) {
                     override fun updateDrawState(ds: TextPaint) {
                         ds.isUnderlineText = true
                     }
-
                     override fun onClick(widget: View) {
                         onSeeAlsoClicked(also.uppercase())
                     }

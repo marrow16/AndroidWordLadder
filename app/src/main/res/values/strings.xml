@@ -12,9 +12,9 @@
     <string name="hint_ladder_length">Select ladder steps</string>
     <string name="empty_text_solutions">(number of solutions)</string>
     <string name="actionbar_title_create">Word Ladder - New Puzzle</string>
-    <string name="actionbar_title_help">Word Ladder - Help</string>
+    <string name="actionbar_title_help">Word Ladder - Help and About</string>
     <string name="actionbar_title_word_lookup">Word Ladder - Word lookup</string>
-    <string name="help">Help…</string>
+    <string name="help">Help and About…</string>
     <string name="help_1">Word Ladder Help</string>
     <string name="help_wkipedia_link">https://en.wikipedia.org/wiki/Word_ladder</string>
     <string name="help_2">The objective of the puzzle is to convert one word to another - at each step you can change only one letter and each word must be a valid word</string>
@@ -31,6 +31,7 @@
     <string name="help_11">To find the meaning of a word use the <b><i>Word lookup…\</i></b> option from the menu.</string>
     <string name="help_11a">Hold finger down on any word entry, start word, end word or solution word display to show the meaning of the word.</string>
     <string name="word_lookup">Word lookup…</string>
+    <string name="high_scores">High Scores…</string>
     <string name="key_label_backspace">⌫</string>
     <string name="key_label_prev">Prev</string>
     <string name="key_label_clear">Clear</string>

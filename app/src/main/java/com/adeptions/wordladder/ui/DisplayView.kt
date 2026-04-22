@@ -4,5 +4,6 @@ enum class DisplayView {
     PUZZLE,
     CREATE,
     WORD_LOOKUP,
-    HELP
+    HELP,
+    HIGH_SCORES
 }

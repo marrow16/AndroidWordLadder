@@ -19,6 +19,8 @@ class Puzzle(val dictionary: Dictionary, val startWord: Word, val endWord: Word,
     var deductionPatternHint: Int = 0
     var deductionPositionHint: Int = 0
     var pointsRemaining: Int = 0
+    var solved: Boolean = false
+
     private val deductions: MutableSet<String> = HashSet()
 
     init {
@@ -26,22 +28,9 @@ class Puzzle(val dictionary: Dictionary, val startWord: Word, val endWord: Word,
     }
 
     private fun calculatePoints() {
-/*
-        val distinctWords: MutableSet<Word> = HashSet()
-        solutions.forEach {
-            for (w in 0 until it.size) {
-                distinctWords.add(it[w])
-            }
-        }
-        for (word in distinctWords) {
-            points += calculateWordScore(word)
-        }
-        points = ((points / solutions.size) * ladderLength) * 10
-        pointsRemaining = points
- */
         points = Math.round(
             ((ladderLength.toDouble() * 5.0) +
-                    (wordLength.toDouble() * 3.5) -
+                    (wordLength.toDouble() * 2.0) -
                     (kotlin.math.log2(solutions.size.toDouble()) * 2.5)) * 100.0
         ).toInt()
         pointsRemaining = points
