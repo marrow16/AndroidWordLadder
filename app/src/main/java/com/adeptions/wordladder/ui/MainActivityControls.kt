@@ -391,6 +391,8 @@ class MainActivityControls(val main: MainActivity) {
             DisplayView.HELP
         } else if (wordLokupContainer.isVisible) {
             DisplayView.WORD_LOOKUP
+        } else if (highScoresContainer.isVisible) {
+            DisplayView.HIGH_SCORES
         } else {
             DisplayView.PUZZLE
         }

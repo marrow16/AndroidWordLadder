@@ -27,6 +27,7 @@
                 android:text="About"
                 android:textSize="24sp"
                 android:textStyle="bold" />
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -60,6 +61,14 @@
             <Space
                 android:layout_width="match_parent"
                 android:layout_height="16sp" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/help_4"
+                android:textSize="20sp" />
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="16sp" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -74,35 +83,91 @@
                 android:text="@string/help_5"
                 android:textSize="20sp" />
 
-            <TextView
-                android:layout_width="match_parent"
+            <LinearLayout
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4sp"
-                android:paddingLeft="16sp"
-                android:text="@string/help_6"
-                android:textSize="20sp" />
-
-            <TextView
-                android:layout_width="match_parent"
+                android:orientation="horizontal"
+                android:layout_marginLeft="8sp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    android:background="@drawable/key_background"
+                    android:paddingLeft="10sp"
+                    android:paddingTop="2dp"
+                    android:paddingRight="10sp"
+                    android:paddingBottom="2dp"
+                    android:text="@string/key_label_hint"
+                    android:textAlignment="center"
+                    android:textSize="20sp" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="4sp"
+                    android:text="@string/help_6a"
+                    android:textSize="20sp" />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4sp"
-                android:paddingLeft="16sp"
-                android:text="@string/help_6a"
-                android:textSize="20sp" />
-
-            <TextView
-                android:layout_width="match_parent"
+                android:orientation="horizontal"
+                android:layout_marginLeft="8sp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    android:background="@drawable/key_background"
+                    android:paddingLeft="10sp"
+                    android:paddingTop="2dp"
+                    android:paddingRight="10sp"
+                    android:paddingBottom="2dp"
+                    android:text="@string/key_label_hint"
+                    android:textAlignment="center"
+                    android:textSize="20sp" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="4sp"
+                    android:text="@string/help_7"
+                    android:textSize="20sp" />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4sp"
-                android:paddingLeft="16sp"
-                android:text="@string/help_7"
-                android:textSize="20sp" />
+                android:orientation="horizontal"
+                android:layout_marginLeft="8sp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    android:background="@drawable/key_background"
+                    android:paddingLeft="10sp"
+                    android:paddingTop="2dp"
+                    android:paddingRight="10sp"
+                    android:paddingBottom="2dp"
+                    android:text="@string/key_label_suggest"
+                    android:textAlignment="center"
+                    android:textSize="20sp" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="4sp"
+                    android:text="@string/help_6"
+                    android:textSize="20sp" />
+            </LinearLayout>
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4sp"
                 android:text="@string/help_5a"
+                android:textSize="20sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4sp"
+                android:text="@string/help_5b"
                 android:textSize="20sp" />
 
             <Space
@@ -149,18 +214,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="16sp" />
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/help_3"
-                android:textSize="24sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/help_4"
-                android:textSize="20sp" />
         </LinearLayout>
     </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

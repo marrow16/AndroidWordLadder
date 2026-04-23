@@ -62,6 +62,18 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onBackPressed() {
+        if (controls.currentView != DisplayView.PUZZLE) {
+            if (controls.currentView == DisplayView.WORD_LOOKUP) {
+                controls.show(controls.wordLookupBack)
+            } else {
+                controls.show(DisplayView.PUZZLE)
+            }
+        } else {
+            super.onBackPressed()
+        }
+    }
+
     private val PREFS_NAME = "game_prefs"
     private val KEY_WORD_LENGTH = "word_length"
     private val KEY_LADDER_LENGTH = "ladder_length"
