@@ -63,7 +63,7 @@ This table shows the spread of adjacent word counts for each word in the diction
 |      14 |  6788 |  2003 |   488 |    91 |    19 |     8 |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |
 |      15 |  4273 |  1358 |   255 |    34 |     5 |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |
 
-![Chart](./images/adjacents.png)
+![Chart](./_images/adjacents.png)
 
 ### Longest Ladders
 
