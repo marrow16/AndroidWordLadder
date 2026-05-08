@@ -19,7 +19,7 @@
     <string name="help_wkipedia_link">https://en.wikipedia.org/wiki/Word_ladder</string>
     <string name="help_2">The objective of the puzzle is to convert one word to another - at each step you can change only one letter and each word must be a valid word.</string>
     <string name="help_3">Dictionary</string>
-    <string name="help_4">The built-in dictionary is based on the Official Collins Scrabble Words (2019)\nIt contains <b><i>279496</i></b> words and this app can generate over <b><i>1.5 million</i></b> different puzzles.</string>
+    <string name="help_4">The built-in dictionary is based on the Official Collins Scrabble Words (2024)\nIt contains <b><i>280887</i></b> words and this app can generate over <b><i>1.5 million</i></b> different puzzles.</string>
     <string name="help_5">With <b><i>Hints</i></b> turned on (see menu) the app will give you some help in finding the word for each step. Use the keyboard buttons...</string>
     <string name="help_6">to fill in the entire word that could fit at the current step.</string>
     <string name="help_6a">(on a letter) tips will appear to suggest what letter(s) can be at that position in the word.</string>

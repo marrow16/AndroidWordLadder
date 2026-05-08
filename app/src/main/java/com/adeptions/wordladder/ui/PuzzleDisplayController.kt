@@ -33,7 +33,7 @@ class PuzzleDisplayController(val main: MainActivity) {
     private var hintsOn: Boolean = true
 
     private var showingSolution: Int = -1;
-    private var solutionsShowing = false
+    var solutionsShowing = false
 
     private var internalUpdate: Boolean = false
 
@@ -476,7 +476,7 @@ class PuzzleDisplayController(val main: MainActivity) {
         toaster.show()
     }
 
-    private fun showSolutions(show: Boolean) {
+    fun showSolutions(show: Boolean) {
         solutionsShowing = show
         if (!solutionsShowing) {
             controls.viewSwitching = true

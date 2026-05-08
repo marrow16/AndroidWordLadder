@@ -69,6 +69,8 @@ class MainActivity : AppCompatActivity() {
             } else {
                 controls.show(DisplayView.PUZZLE)
             }
+        } else if (puzzleDisplayController.solutionsShowing) {
+            puzzleDisplayController.showSolutions(false)
         } else {
             super.onBackPressed()
         }

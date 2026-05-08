@@ -77,13 +77,15 @@ class WordLookupController(val main: MainActivity) {
     }
 
     private fun onLookupClick() {
-        startLoading()
         val word = controls.lookupWordEdit.text.toString()
-        if (word.length in 2..15) {
-            val dictionary = Dictionary.Factory.fromWord(main.resources, word)
-            lookupWord(dictionary[word], word)
-        } else {
-            endLoadingNotFound()
+        if (word.isNotEmpty()) {
+            startLoading()
+            if (word.length in 2..15) {
+                val dictionary = Dictionary.Factory.fromWord(main.resources, word)
+                lookupWord(dictionary[word], word)
+            } else {
+                endLoadingNotFound()
+            }
         }
     }
 
